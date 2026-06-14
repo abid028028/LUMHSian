@@ -1,0 +1,680 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>LUMHSian Pro | MBBS QBank</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f7fc;
+      color: #0f2b3d;
+      overflow-x: hidden;
+    }
+
+    /* Modern scroll */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e2e8f0;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e6b6b;
+      border-radius: 10px;
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+    .screen.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(4px);
+      border-radius: 32px;
+      box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(30, 107, 107, 0.15);
+      transition: all 0.2s;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(105deg, #1a6b6b 0%, #0f5c5c 100%);
+      border: none;
+      padding: 14px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 15px;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 4px 12px rgba(26, 107, 107, 0.25);
+      width: 100%;
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-secondary {
+      background: white;
+      border: 1.5px solid #cbd5e1;
+      padding: 12px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+    }
+    .btn-secondary:active { transform: scale(0.97); }
+
+    /* Inputs */
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid #e2edf2;
+      border-radius: 60px;
+      font-size: 16px;
+      background: white;
+      transition: 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #1e6b6b;
+      box-shadow: 0 0 0 3px rgba(30, 107, 107, 0.1);
+    }
+
+    /* Year cards */
+    .year-card {
+      background: white;
+      border-radius: 28px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border: 1px solid #e2edf2;
+      transition: all 0.2s;
+    }
+    .year-card.active {
+      border-color: #1e6b6b;
+      background: #f0faf8;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+    }
+    .year-card.coming {
+      opacity: 0.6;
+      filter: grayscale(0.1);
+    }
+    .badge-coming {
+      background: #f59e0b;
+      color: white;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-weight: 600;
+    }
+
+    /* Module cards */
+    .module-card {
+      background: white;
+      border-radius: 24px;
+      padding: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid #e2edf2;
+      transition: all 0.2s;
+    }
+    .module-card:hover {
+      border-color: #1e6b6b;
+      transform: translateX(4px);
+    }
+
+    /* Practice & paper cards */
+    .practice-item {
+      background: white;
+      border-radius: 22px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid #e9f0f3;
+      transition: 0.2s;
+    }
+    .locked {
+      opacity: 0.7;
+      background: #f9fbfd;
+    }
+    .lock-icon {
+      background: #ef4444;
+      color: white;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 40px;
+    }
+    .premium-icon {
+      background: #1e6b6b;
+      color: white;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 40px;
+    }
+
+    /* Test options */
+    .opt-btn {
+      background: white;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 60px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .opt-btn.selected {
+      background: #1e6b6b;
+      border-color: #1e6b6b;
+      color: white;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1e2a3a;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 60px;
+      font-size: 13px;
+      z-index: 9999;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .timer {
+      font-family: monospace;
+      font-size: 28px;
+      font-weight: 800;
+      background: #0a2a2a;
+      color: #bbf0f0;
+      padding: 6px 14px;
+      border-radius: 60px;
+      letter-spacing: 2px;
+    }
+
+    .q-nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .q-nav-btn.current {
+      background: #1e6b6b;
+      color: white;
+      border: none;
+    }
+    .q-nav-btn.attempted {
+      background: #10b981;
+      color: white;
+      border: none;
+    }
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- SPLASH / LOGIN -->
+<div id="screen-splash" class="screen active">
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, #eaf6f4, #d9ece8); padding: 24px;">
+    <div class="card" style="max-width: 400px; width: 100%; padding: 36px 24px; text-align: center;">
+      <div style="font-size: 70px;">🩺</div>
+      <h1 style="font-size: 36px; margin: 8px 0;">LUMHSian Pro</h1>
+      <p style="color: #3b6e6e; margin-bottom: 24px;">2nd Year MBBS QBank</p>
+      <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+        <button class="btn-secondary" id="tab-signup" style="background: #1e6b6b; color: white;" onclick="uiShowSignup()">Sign Up</button>
+        <button class="btn-secondary" id="tab-login" onclick="uiShowLogin()">Login</button>
+      </div>
+      <div id="signup-box">
+        <input type="text" id="signup-name" class="input-field" placeholder="Full Name" style="margin-bottom: 12px;">
+        <input type="email" id="signup-email" class="input-field" placeholder="Gmail" style="margin-bottom: 12px;">
+        <input type="password" id="signup-password" class="input-field" placeholder="Password" style="margin-bottom: 20px;">
+        <button class="btn-primary" onclick="doSignup()">Create Account →</button>
+      </div>
+      <div id="login-box" style="display: none;">
+        <input type="email" id="login-email" class="input-field" placeholder="Gmail" style="margin-bottom: 12px;">
+        <input type="password" id="login-password" class="input-field" placeholder="Password" style="margin-bottom: 20px;">
+        <button class="btn-primary" onclick="doLogin()">Login →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- YEAR SELECTION -->
+<div id="screen-year" class="screen">
+  <div style="padding: 40px 20px; max-width: 550px; margin: 0 auto;">
+    <div class="card" style="padding: 28px; text-align: center; margin-bottom: 24px;">
+      <h2>📚 Select MBBS Year</h2>
+      <p style="color: #4a6e6e;">Choose your academic year</p>
+    </div>
+    <div id="years-container"></div>
+  </div>
+</div>
+
+<!-- HOME DASHBOARD -->
+<div id="screen-home" class="screen">
+  <div style="padding: 20px; max-width: 650px; margin: 0 auto;">
+    <div class="flex-between" style="margin-bottom: 16px;">
+      <h1 style="color: #1a6b6b;">LUMHSian Pro</h1>
+      <div>
+        <button class="btn-secondary" style="width: auto; padding: 6px 14px;" onclick="showScreen('profile')">👤</button>
+        <button class="btn-secondary" style="width: auto; padding: 6px 14px; margin-left: 6px;" onclick="showLeaderboard()">🏆</button>
+      </div>
+    </div>
+    <div class="card" style="padding: 20px; margin-bottom: 20px;" id="homeStats"></div>
+    <div id="modulesList"></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="screen-profile" class="screen">
+  <div style="padding: 20px; max-width: 550px; margin: 0 auto;">
+    <button class="btn-secondary" style="width: auto; margin-bottom: 16px;" onclick="showScreen('home')">← Back</button>
+    <div class="card" id="profileCard" style="padding: 28px; text-align: center;"></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="screen-leaderboard" class="screen">
+  <div style="padding: 20px; max-width: 550px; margin: 0 auto;">
+    <button class="btn-secondary" style="width: auto; margin-bottom: 16px;" onclick="showScreen('home')">← Back</button>
+    <div class="card" id="leaderboardCard" style="padding: 20px;"></div>
+  </div>
+</div>
+
+<!-- MODULE DETAILS -->
+<div id="screen-module" class="screen"></div>
+
+<!-- TEST ENGINE -->
+<div id="screen-test" class="screen">
+  <div style="padding: 20px; max-width: 700px; margin: 0 auto;">
+    <div class="flex-between" style="margin-bottom: 12px;">
+      <div><p id="testLabel" style="font-weight: 700;"></p><p id="testQcount"></p></div>
+      <div class="timer" id="timerDisplay">00:00</div>
+    </div>
+    <div class="card" style="padding: 20px; margin-bottom: 16px;" id="testQuestionCard"></div>
+    <div id="testOptions"></div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;" id="testNav"></div>
+    <div class="flex-between" style="gap: 12px;">
+      <button class="btn-secondary" style="flex:1" onclick="testPrev()">← Prev</button>
+      <button class="btn-primary" style="flex:2" onclick="testNext()">Next →</button>
+    </div>
+    <button class="btn-secondary" style="background:#b91c1c; color:white; margin-top: 12px;" onclick="submitTest()">Submit Test</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div style="padding: 20px; max-width: 550px; margin: 0 auto;" id="resultsContainer"></div>
+</div>
+
+<!-- PREMIUM POPUP (hidden modal) -->
+<div id="premiumModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 10000; padding: 20px;">
+  <div class="card" style="max-width: 360px; width: 100%; padding: 24px; text-align: center;">
+    <div style="font-size: 48px;">⭐</div>
+    <h3>Unlock Premium</h3>
+    <div style="text-align: left; margin: 16px 0; font-size: 13px;">
+      <p>✅ All Past Papers (2019-2024)</p>
+      <p>✅ Unlimited Practice Tests</p>
+      <p>✅ Unlimited Bookmarks</p>
+      <p>✅ Detailed Performance Analytics</p>
+      <p>✅ Priority Support</p>
+    </div>
+    <div style="background: #f2f7f5; border-radius: 24px; padding: 12px; margin: 12px 0;">
+      <p><strong>📅 3 Months</strong> — Rs. 500</p>
+      <p><strong>📅 1 Year</strong> — Rs. 1,000</p>
+    </div>
+    <button class="btn-primary" onclick="goToPayment()">Upgrade Now →</button>
+    <button class="btn-secondary" style="margin-top: 10px;" onclick="closePremiumModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- PAYMENT SCREEN -->
+<div id="screen-payment" class="screen">
+  <div style="padding: 20px; max-width: 480px; margin: 0 auto;">
+    <button class="btn-secondary" style="width: auto; margin-bottom: 16px;" onclick="showScreen('home')">← Back</button>
+    <div class="card" style="padding: 28px; text-align: center;">
+      <div style="font-size: 48px;">💳</div>
+      <h2>Upgrade to Premium</h2>
+      <div style="margin: 20px 0;">
+        <button class="btn-secondary" style="margin-bottom: 12px;" onclick="selectPlan(500)">3 Months — Rs. 500</button>
+        <button class="btn-secondary" onclick="selectPlan(1000)">1 Year — Rs. 1,000</button>
+      </div>
+      <div style="background: #f1f5f9; border-radius: 24px; padding: 16px; margin: 16px 0;">
+        <p style="font-weight: 700;">Send payment to:</p>
+        <p style="font-size: 24px; font-weight: 800;">03013560983</p>
+        <p>JazzCash / Easypaisa (Abid Khan)</p>
+      </div>
+      <input type="text" id="transactionId" class="input-field" placeholder="Transaction ID" style="margin-bottom: 12px;">
+      <button class="btn-primary" onclick="submitPayment()">Submit for Verification</button>
+      <p style="font-size: 11px; margin-top: 12px;">✅ Verified within 24 hours</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ~~~~~~~~~~ STORAGE ~~~~~~~~~~
+  function getUsers(){ return JSON.parse(localStorage.getItem('lum_pro_users')||'[]');}
+  function saveUsers(u){ localStorage.setItem('lum_pro_users',JSON.stringify(u));}
+  function getUserStats(email){ return JSON.parse(localStorage.getItem(`stats_${email}`)||'{"totalTests":0,"totalCorrect":0,"totalQuestions":0,"bestScore":0,"history":[],"moduleStats":{}}');}
+  function saveUserStats(email,s){ localStorage.setItem(`stats_${email}`,JSON.stringify(s));}
+  function getPayment(email){ return JSON.parse(localStorage.getItem(`pay_${email}`)||'{"plan":"none","expiry":0,"pending":false}');}
+  function setPayment(email,plan,expiry,pending){ localStorage.setItem(`pay_${email}`,JSON.stringify({plan,expiry,pending}));}
+  function getBookmarks(email){ return JSON.parse(localStorage.getItem(`bm_${email}`)||'[]');}
+  function saveBookmarks(email,bm){ localStorage.setItem(`bm_${email}`,JSON.stringify(bm));}
+
+  let currentUser=null;
+  let selectedPlan=500;
+
+  // UI helpers
+  function showToast(msg){ let t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);}
+  function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(`screen-${id}`).classList.add('active'); if(id==='home') renderHomeDashboard(); if(id==='profile') renderProfile(); if(id==='leaderboard') renderLeaderboard();}
+  function uiShowSignup(){ document.getElementById('signup-box').style.display='block'; document.getElementById('login-box').style.display='none'; document.getElementById('tab-signup').style.background='#1e6b6b'; document.getElementById('tab-login').style.background='white'; document.getElementById('tab-signup').style.color='white'; document.getElementById('tab-login').style.color='#1e6b6b';}
+  function uiShowLogin(){ document.getElementById('signup-box').style.display='none'; document.getElementById('login-box').style.display='block'; document.getElementById('tab-login').style.background='#1e6b6b'; document.getElementById('tab-signup').style.background='white'; document.getElementById('tab-login').style.color='white'; document.getElementById('tab-signup').style.color='#1e6b6b';}
+
+  function doSignup(){
+    let name=document.getElementById('signup-name').value.trim();
+    let email=document.getElementById('signup-email').value.trim();
+    let pass=document.getElementById('signup-password').value;
+    if(!name||!email||!pass){ showToast('All fields required'); return; }
+    let users=getUsers();
+    if(users.find(u=>u.email===email)){ showToast('Email exists'); return; }
+    let newUser={name,email,password:pass,joined:Date.now()};
+    users.push(newUser);
+    saveUsers(users);
+    currentUser=newUser;
+    showToast('Account created! Select your year.');
+    showYearScreen();
+  }
+  function doLogin(){
+    let email=document.getElementById('login-email').value.trim();
+    let pass=document.getElementById('login-password').value;
+    let users=getUsers();
+    let user=users.find(u=>u.email===email && u.password===pass);
+    if(!user){ showToast('Invalid credentials'); return; }
+    currentUser=user;
+    showToast(`Welcome ${user.name}`);
+    showYearScreen();
+  }
+  function showYearScreen(){
+    let years=[1,2,3,4,5];
+    let container=document.getElementById('years-container');
+    container.innerHTML='';
+    years.forEach(y=>{
+      let active=y===2;
+      let div=document.createElement('div');
+      div.className=`year-card ${active?'active':''} ${!active?'coming':''}`;
+      div.innerHTML=`<div><span style="font-size:28px;">${y===1?'📖':y===2?'🩺':y===3?'🏥':y===4?'🩻':'🎓'}</span> <strong>${y}${y===1?'st':y===2?'nd':y===3?'rd':'th'} Year MBBS</strong></div><div>${active?'→':'<span class="badge-coming">Coming Soon</span>'}</div>`;
+      if(active) div.onclick=()=>{ showScreen('home'); renderHomeDashboard(); };
+      else div.onclick=()=>showToast('Only 2nd Year MBBS is available now.');
+      container.appendChild(div);
+    });
+    showScreen('year');
+  }
+
+  // Modules & content
+  const MODULES=['Neuroscience','Head & Neck','GIT & Liver','Endocrinology','Renal System','Reproduction'];
+  const SUBJECTS=['Gross Anatomy','Histology','Embryology','Physiology','Biochemistry'];
+
+  function renderHomeDashboard(){
+    if(!currentUser) return;
+    let stats=getUserStats(currentUser.email);
+    let pay=getPayment(currentUser.email);
+    let isPaid=pay.plan!=='none' && pay.expiry>Date.now();
+    let acc=stats.totalQuestions?Math.round((stats.totalCorrect/stats.totalQuestions)*100):0;
+    document.getElementById('homeStats').innerHTML=`
+      <div class="flex-between"><span>👋 ${currentUser.name}</span><span>📊 ${acc}% accuracy</span></div>
+      <div class="flex-between" style="margin-top:12px;"><span>📝 ${stats.totalTests} tests</span><span>${isPaid?'⭐ Premium':'🔓 Free'}</span></div>
+    `;
+    let container=document.getElementById('modulesList');
+    container.innerHTML='<h3 style="margin-bottom:12px;">📚 2nd Year Modules</h3>';
+    MODULES.forEach(mod=>{
+      let card=document.createElement('div');
+      card.className='module-card';
+      card.innerHTML=`<div><span style="font-size:28px;">${mod==='Neuroscience'?'🧠':mod==='Head & Neck'?'💀':mod==='GIT & Liver'?'🫁':mod==='Endocrinology'?'⚗️':mod==='Renal System'?'🫘':'🧬'}</span> <strong>${mod}</strong></div><div>→</div>`;
+      card.onclick=()=>openModule(mod);
+      container.appendChild(card);
+    });
+  }
+
+  function openModule(moduleName){
+    let pay=getPayment(currentUser.email);
+    let isPaid=pay.plan!=='none' && pay.expiry>Date.now();
+    let stats=getUserStats(currentUser.email);
+    let ms=stats.moduleStats[moduleName]||{};
+    let html=`<div style="padding:20px;max-width:700px;margin:0 auto;"><button class="btn-secondary" style="width:auto;margin-bottom:16px;" onclick="showScreen('home')">← Back</button><div class="card" style="padding:24px;text-align:center;margin-bottom:20px;"><div style="font-size:52px;">${moduleName==='Neuroscience'?'🧠':moduleName==='Head & Neck'?'💀':moduleName==='GIT & Liver'?'🫁':moduleName==='Endocrinology'?'⚗️':moduleName==='Renal System'?'🫘':'🧬'}</div><h2>${moduleName}</h2><p>${ms.totalQuestions||0} Qs solved | ${ms.totalQuestions?Math.round((ms.totalCorrect/ms.totalQuestions)*100):0}% accuracy</p></div>`;
+    // Past Papers (2 free for all)
+    let freeYears=[2023,2024];
+    html+=`<h3>📄 Past Papers</h3>`;
+    freeYears.forEach(y=>{
+      html+=`<div class="practice-item" onclick="startTest('${moduleName}',null,${y})"><span>📅 ${y} (100 BCQs)</span><span style="color:#1e6b6b;">→</span></div>`;
+    });
+    if(isPaid){
+      [2019,2020,2021,2022].forEach(y=>{
+        html+=`<div class="practice-item" onclick="startTest('${moduleName}',null,${y})"><span>📅 ${y} (100 BCQs)</span><span style="color:#1e6b6b;">→</span></div>`;
+      });
+    }else{
+      html+=`<div class="practice-item locked" onclick="showPremiumModal()"><span>📅 2019-2022 (100 BCQs)</span><span class="lock-icon">🔒 Premium</span></div>`;
+    }
+    // Practice tests: 1 free only for free users
+    html+=`<h3 style="margin-top:24px;">📚 Practice Tests</h3>`;
+    let practiceShown=0;
+    SUBJECTS.forEach(sub=>{
+      if(isPaid){
+        html+=`<div class="practice-item" onclick="startTest('${moduleName}','${sub}',null)"><span>📖 ${sub} (10 BCQs)</span><span style="color:#1e6b6b;">→</span></div>`;
+      }else{
+        if(practiceShown<1){
+          html+=`<div class="practice-item" onclick="startTest('${moduleName}','${sub}',null)"><span>📖 ${sub} (10 BCQs) — FREE DEMO</span><span style="color:#1e6b6b;">→</span></div>`;
+          practiceShown++;
+        }else{
+          html+=`<div class="practice-item locked" onclick="showPremiumModal()"><span>📖 ${sub} (10 BCQs)</span><span class="lock-icon">🔒 Premium</span></div>`;
+        }
+      }
+    });
+    if(!isPaid){
+      html+=`<div class="card" style="margin-top:20px;background:#feeed6;text-align:center;"><p>⭐ You have 1 free practice test & 2 free past papers per module.</p><button class="btn-primary" style="margin-top:8px;" onclick="showPremiumModal()">Upgrade to Premium (Rs.500/3mo, Rs.1000/1yr)</button></div>`;
+    }
+    html+=`</div>`;
+    document.getElementById('screen-module').innerHTML=html;
+    showScreen('module');
+  }
+
+  function showPremiumModal(){ document.getElementById('premiumModal').style.display='flex'; }
+  function closePremiumModal(){ document.getElementById('premiumModal').style.display='none'; }
+  function goToPayment(){ closePremiumModal(); showScreen('payment'); }
+
+  function selectPlan(amt){ selectedPlan=amt; showToast(`Plan selected: ${amt===500?'3 Months (Rs.500)':'1 Year (Rs.1000)'}`); }
+  function submitPayment(){
+    let tid=document.getElementById('transactionId').value.trim();
+    if(!tid){ showToast('Enter Transaction ID'); return; }
+    let expiry=Date.now()+(selectedPlan===500?90:365)*24*60*60*1000;
+    setPayment(currentUser.email,selectedPlan===500?'3months':'1year',expiry,true);
+    showToast('✅ Payment submitted! Premium will be active after verification within 24h.');
+    showScreen('home');
+    renderHomeDashboard();
+  }
+
+  // ========= TEST ENGINE =========
+  let testQuestions=[], testAnswers={}, testCurrent=0, testTime=0, testInterval=null, testConfig={};
+  function startTest(module,subject,year){
+    let count=year?100:10;
+    testQuestions=Array.from({length:count},(_,i)=>({
+      id:i, text:`${module} ${subject||'Past Paper '+year} Q${i+1}: A patient presents with ... What is the most appropriate mechanism?`,
+      options:[`A) Incorrect variant`,`B) Secondary change`,`C) CORRECT: Primary mechanism`,`D) Associated factor`,`E) Unrelated pathway`],
+      answer:2, explanation:`Core concept of ${module} — essential for clinical practice.`
+    }));
+    testAnswers={};
+    testCurrent=0;
+    testTime=year?7200:600;
+    testConfig={module,subject,year};
+    if(testInterval) clearInterval(testInterval);
+    testInterval=setInterval(()=>{
+      if(testTime<=0){ clearInterval(testInterval); submitTest(); }
+      else{ testTime--; document.getElementById('timerDisplay').innerText=Math.floor(testTime/60)+':'+(testTime%60).toString().padStart(2,'0'); }
+    },1000);
+    renderTest();
+    showScreen('test');
+  }
+  function renderTest(){
+    let q=testQuestions[testCurrent];
+    document.getElementById('testLabel').innerHTML=testConfig.subject||'Past Paper '+testConfig.year;
+    document.getElementById('testQcount').innerHTML=`Question ${testCurrent+1}/${testQuestions.length}`;
+    document.getElementById('testQuestionCard').innerHTML=`<p>${q.text}</p>`;
+    let optsDiv=document.getElementById('testOptions');
+    optsDiv.innerHTML='';
+    q.options.forEach((opt,i)=>{
+      let btn=document.createElement('div');
+      btn.className=`opt-btn ${testAnswers[testCurrent]===i?'selected':''}`;
+      btn.innerText=opt;
+      btn.onclick=()=>{ testAnswers[testCurrent]=i; renderTest(); };
+      optsDiv.appendChild(btn);
+    });
+    let navDiv=document.getElementById('testNav');
+    navDiv.innerHTML='';
+    testQuestions.forEach((_,idx)=>{
+      let btn=document.createElement('button');
+      btn.className='q-nav-btn';
+      if(idx===testCurrent) btn.classList.add('current');
+      else if(testAnswers[idx]!==undefined) btn.classList.add('attempted');
+      btn.innerText=idx+1;
+      btn.onclick=()=>{ testCurrent=idx; renderTest(); };
+      navDiv.appendChild(btn);
+    });
+  }
+  function testPrev(){ if(testCurrent>0){ testCurrent--; renderTest(); } }
+  function testNext(){ if(testCurrent<testQuestions.length-1){ testCurrent++; renderTest(); } else submitTest(); }
+  function submitTest(){
+    if(testInterval) clearInterval(testInterval);
+    let correct=0,wrong=0,skip=0;
+    testQuestions.forEach((q,i)=>{
+      let ans=testAnswers[i];
+      if(ans===undefined) skip++;
+      else if(ans===q.answer) correct++;
+      else wrong++;
+    });
+    let pct=Math.round((correct/testQuestions.length)*100);
+    let stats=getUserStats(currentUser.email);
+    stats.totalTests++; stats.totalCorrect+=correct; stats.totalQuestions+=testQuestions.length;
+    stats.bestScore=Math.max(stats.bestScore,pct);
+    stats.history.unshift({date:new Date().toLocaleDateString(),module:testConfig.module,label:testConfig.subject||testConfig.year,pct,correct,wrong,skip,total:testQuestions.length});
+    let ms=stats.moduleStats[testConfig.module]||{totalTests:0,totalCorrect:0,totalQuestions:0};
+    ms.totalTests++; ms.totalCorrect+=correct; ms.totalQuestions+=testQuestions.length;
+    stats.moduleStats[testConfig.module]=ms;
+    saveUserStats(currentUser.email,stats);
+    document.getElementById('resultsContainer').innerHTML=`
+      <div class="card" style="text-align:center;padding:32px;"><div style="font-size:64px;">${pct>=70?'🎉':'📚'}</div><div style="font-size:48px;font-weight:800;">${pct}%</div><div class="flex-between" style="margin:20px 0;"><div>✅ ${correct}</div><div>❌ ${wrong}</div><div>⏭️ ${skip}</div></div><button class="btn-primary" onclick="showScreen('home')">Continue →</button></div>
+    `;
+    showScreen('results');
+  }
+
+  function renderProfile(){
+    let stats=getUserStats(currentUser.email);
+    let pay=getPayment(currentUser.email);
+    let isPaid=pay.plan!=='none' && pay.expiry>Date.now();
+    let acc=stats.totalQuestions?Math.round((stats.totalCorrect/stats.totalQuestions)*100):0;
+    let bm=getBookmarks(currentUser.email);
+    document.getElementById('profileCard').innerHTML=`
+      <div style="font-size:64px;">👩‍⚕️</div>
+      <h2>${currentUser.name}</h2>
+      <p>${currentUser.email}</p>
+      <p>2nd Year MBBS</p>
+      <div style="margin:16px 0;">📊 Accuracy: ${acc}%<br>📝 Tests: ${stats.totalTests}<br>🏆 Best: ${stats.bestScore}%<br>🔖 Bookmarks: ${bm.length} / ${isPaid?'∞':5}</div>
+      ${!isPaid?'<button class="btn-primary" onclick="showScreen(\'payment\')">Upgrade to Premium</button>':''}
+      <button class="btn-secondary" style="margin-top:12px;background:#b91c1c;color:white;" onclick="logout()">Logout</button>
+    `;
+    showScreen('profile');
+  }
+  function renderLeaderboard(){
+    let users=getUsers();
+    let ranks=users.map(u=>{
+      let s=getUserStats(u.email);
+      let acc=s.totalQuestions?Math.round((s.totalCorrect/s.totalQuestions)*100):0;
+      return {name:u.name,email:u.email,acc,tests:s.totalTests};
+    }).sort((a,b)=>b.acc-a.acc);
+    let html=`<h2>🏆 Leaderboard</h2><div style="margin:16px 0;background:#1e6b6b;color:white;padding:12px;border-radius:40px;">Total Students: ${ranks.length}</div>`;
+    ranks.forEach((u,i)=>{
+      html+=`<div class="practice-item" style="cursor:default;"><span>#${i+1} ${u.name}</span><span>${u.acc}% (${u.tests} tests)</span></div>`;
+    });
+    document.getElementById('leaderboardCard').innerHTML=html;
+    showScreen('leaderboard');
+  }
+  function logout(){ currentUser=null; showScreen('splash'); }
+
+  // Admin panel (Ctrl+Shift+A)
+  document.addEventListener('keydown',(e)=>{
+    if(e.ctrlKey && e.shiftKey && e.key==='A'){
+      let code=prompt('Admin access code:');
+      if(code==='2025'){
+        let users=getUsers();
+        let msg='👑 ADMIN PANEL\n\n';
+        users.forEach(u=>{
+          let pay=getPayment(u.email);
+          msg+=`${u.name} (${u.email})\nPlan: ${pay.plan} ${pay.pending?'(Pending)':''}\n---\n`;
+        });
+        alert(msg);
+        let pendingUsers=users.filter(u=>getPayment(u.email).pending);
+        if(pendingUsers.length && confirm(`${pendingUsers.length} pending payments. Verify now?`)){
+          pendingUsers.forEach(u=>{
+            let p=getPayment(u.email);
+            setPayment(u.email,p.plan,p.expiry,false);
+          });
+          showToast(`${pendingUsers.length} premium verified!`);
+        }
+      }
+    }
+  });
+
+  // init: ensure admin exists
+  let admins=getUsers();
+  if(!admins.find(u=>u.email==='admin@lumhsian.com')){
+    let adminAcc={name:'Admin',email:'admin@lumhsian.com',password:'admin123',joined:Date.now()};
+    admins.push(adminAcc);
+    saveUsers(admins);
+    setPayment('admin@lumhsian.com','1year',Date.now()+365*24*60*60*1000,false);
+  }
+</script>
+</body>
+</html>
+```
